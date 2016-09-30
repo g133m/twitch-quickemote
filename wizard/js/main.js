@@ -70,7 +70,7 @@ var initializeEmoteButtons = function(buttons) {
         $('.chat-interface').style('height','160px','important');
         $('.scroll.chat-messages').style('bottom','160px','important');
         buttons.forEach(function(item) {
-            var img = '<img style="width: 22px; margin-top: 2px" src="'+item.icon+'" />';
+            var img = '<img style="height: 22px; margin-top: 2px" src="'+item.icon+'" />';
             var el = $('<a class="button button--icon-only float-left" style="margin-top: 8px;">'+img+'</a>');
             if(buttons.indexOf(item) === 0) { el.css({'clear': 'left'}); }
             el.appendTo('.chat-buttons-container');
