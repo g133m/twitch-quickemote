@@ -25,3 +25,11 @@ pre {
 body {
   padding: 20px;
 }
+
+.icon-button button {
+  padding: 4px;
+  min-width: 30px;
+}
+.icon-button img {
+  height: 20px;
+}

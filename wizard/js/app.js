@@ -1,6 +1,6 @@
 angular.module('wizardApp', ['ui.bootstrap', 'ui.select'])
 
-.controller('mainController', ['$scope', 'emoteTemplates', '$uibModal', '$timeout', function($scope, emoteTemplates, $uibModal, $timeout) {
+.controller('mainController', ['$scope', 'emoteTemplates', '$uibModal', '$timeout', '$interval', function($scope, emoteTemplates, $uibModal, $timeout, $interval) {
 
     $timeout(function() {
         $scope.buttons = window.__g133mbuttons || [];
@@ -91,10 +91,22 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select'])
         }).result;
     };
 
-    $scope.$watch('buttons', _.debounce(function(b) {
-        if(!b || !b.length)
-            return;
-        $scope.generating = true;
+
+    $interval(function() {
+        if($scope.generating) {
+            $scope.result = '[\n  '+
+                $scope.buttons.map(function(b) {
+                    return JSON.stringify(b);
+                }).join(',\n  ')
+            + '\n]';
+
+            var res = document.getElementById('/scriptfile.js').innerHTML.replace('{script}', $scope.result);
+            $scope.makeBlob(res);
+        }
+    }, 2000);
+    var buttonsUpdated = _.debounce(function(b) {
+        
+        
         $scope.result = '[\n  '+
             $scope.buttons.map(function(b) {
                 return JSON.stringify(b);
@@ -103,7 +115,13 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select'])
 
         var res = document.getElementById('/scriptfile.js').innerHTML.replace('{script}', $scope.result);
         $scope.makeBlob(res);
-    }, 2000), true);
+    }, 2000);
+
+    $scope.$watch('buttons', function(b){ 
+        if(!b || !b.length)
+            return;
+        $scope.generating = true;
+    }, true);
 }])
 
 .controller('emoteSearchController', ['$scope', 'emoteGetter', 'emoteTemplates', '$timeout', 'callback', function($scope, emoteGetter, emoteTemplates, $timeout, callback) {
