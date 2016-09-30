@@ -1,0 +1,23 @@
+.buttons {
+  width: 600px;
+  padding: 10px;
+}
+
+.buttons .stripes {
+  padding: 10px;
+}
+
+.buttons textarea {
+  height: 60px;
+  width: 200px;
+}
+
+.buttons .stripes:nth-child(even) {
+  background-color: #eeeeee;
+  
+}
+
+pre {
+  height: 400px;
+  width: 600px;
+}

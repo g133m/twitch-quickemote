@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html ng-app="wizardApp">
+	<head>
+		<title>Twitch QuickEMOTE - Setup Wizard</title>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-select/0.19.4/select.min.css" />
+		<link rel="stylesheet" href="css/app.css" />
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.16.2/lodash.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.8/angular.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-select/0.19.4/select.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-bootstrap/2.1.4/ui-bootstrap-tpls.min.js"></script>
+		<script type="text/javascript" src="js/app.js"></script>
+		
+	</head>
+	<body ng-controller="mainController">
+		<h1>
+			twitch Quick Emote
+		</h1>
+
+		<h4 class="bold">
+			Configure Emote Buttons
+		</h4>
+		<button class="btn btn-primary" ng-click="addButton()">
+			+ Add Button
+		</button>
+		<div class="buttons">
+			<div class="row">
+				<div class="col-xs-2">
+					<h4 class="bold">Icon</h4>
+				</div>
+				<div class="col-xs-6">
+					<h4 class="bold">Emotes Sent When Pressed</h4>
+				</div>
+				<div class="col-xs-2">
+					
+				</div>
+				<div class="col-xs-2">
+					
+				</div>
+			</div>
+			<div ng-repeat="button in buttons track by $index" class="stripes">
+				<div class="row">
+					<div class="col-xs-2">
+						<button class="btn" ng-click="changeIcon(button)" uib-tooltip="Click to change icon" tooltip-placement="top-left">
+							<img ng-src="{{button.icon}}"  />
+						</button>
+					</div>
+					<div class="col-xs-6">
+						<textarea class="form-control" ng-model="button.text" placeholder="Enter emotes here">
+						</textarea>
+					</div>
+					<div class="col-xs-2">
+						<button class="btn btn-sm btn-primary" ng-click="getIconText(button)">
+							Find Emote
+						</button>
+					</div>
+					<div class="col-xs-2">
+						<button class="btn btn-sm btn-danger" ng-click="removeButton(button)">delete</button>
+					</div>
+				</div>
+		</div>
+
+		<div class="row form-group"></div>
+		<div class="row">
+			<div class="col-xs-6">
+				<button class="btn btn-primary" ng-click="generate()">
+					Generate
+				</button>
+				<a ng-show="fileurl" download="twitchQuickEmote_buttons.js" ng-href="{{fileurl}}">Download User Script</a>
+			</div>
+		</div>
+
+
+
+
+		<script type="text/ng-template" id="/emoteSearch">
+			<div class="modal-header">
+				<h3>Search for emotes</h3>
+			</div>
+			<div class="modal-body container-fluid">
+				<uib-alert type="error" ng-show="error">
+					{{error}} <button class="btn btn-sm btn-danger" ng-click="error = null">x</button>
+				</uib-alert>
+				<div class="row">
+					<div class="col-xs-4">
+						<input class="form-control" type="text" ng-model="channelText" placeholder="Channel (optional)" />
+					</div>
+					<div class="col-xs-8">
+						<button class="btn btn-primary" ng-disabled="fetchingEmotes" ng-click="search()">
+							Get Emotes
+						</button>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-12">
+						<h4>Twitch Emotes</h4>
+					</div>
+					<div class="col-xs-12">
+						<button class="btn" ng-repeat="emote in twitchOptions |orderBy:'image_id'" ng-click="setEmote(emote)" uib-tooltip="{{emote.code}}">
+							<img ng-src="{{getImgSrc(emote, 'twitch')}}" />
+						</button>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-xs-12">
+						<h4>BetterTTV Emotes</h4>
+					</div>
+					<div class="col-xs-12">
+						<button class="btn" ng-repeat="emote in bttvOptions | orderBy:'id'" ng-click="setEmote(emote)" uib-tooltip="{{emote.code}}">
+							<img ng-src="{{getImgSrc(emote, 'bttv')}}" />
+						</button>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer"></div>
+		</script>
+
+		<script type="text/ng-template" id="/scriptfile.js">
+			//@name  Test File
+			initialize({script});
+		</script>
+	</body>
+</html>
