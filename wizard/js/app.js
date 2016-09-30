@@ -15,7 +15,7 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select'])
     };
     var textFile = null
     , makeBlob = function(text) {
-        var data = new Blob([text], {type: 'text/plain'});
+        var data = new Blob([text], {type: 'octet/stream'});
 
         // If we are replacing a previously generated file we need to
         // manually revoke the object URL to avoid memory leaks.
@@ -25,6 +25,14 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select'])
 
         textFile = window.URL.createObjectURL(data);
 
+        var a = document.createElement("a");
+        document.body.appendChild(a);
+        a.style = "display: none";
+        a.href = textFile;
+        a.download = 'twitchQuickEmote_buttons.js';
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
         return textFile;
     }
 
