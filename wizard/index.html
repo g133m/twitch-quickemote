@@ -153,12 +153,15 @@
 // @description  Add buttons to quickly send emote-heavy messages to chat
 // @author       g133m
 // @include        https://www.twitch.tv/*
-// @include        https://g133m.github.io/twitch-quickemotes/wizard/
+// @include        https://g133m.github.io/twitch-quickemote/wizard/
+// @grant unsafeWindow
 // ==/UserScript==
 (function() {
 	'use strict';
+var buttons = {script};
+unsafeWindow.__g133mbuttons = buttons;
 initializeEmoteButtons(
-	{script}
+	buttons
 );
 })();
 </script>

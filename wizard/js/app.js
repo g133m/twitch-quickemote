@@ -2,8 +2,8 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select'])
 
 .controller('mainController', ['$scope', 'emoteTemplates', '$uibModal', '$timeout', function($scope, emoteTemplates, $uibModal, $timeout) {
 
-    $scope.buttons = [];
-
+    $scope.buttons = window.__g133mbuttons || [];
+    
     $scope.addButton = function() {
         $scope.buttons.push({
             text: '',
