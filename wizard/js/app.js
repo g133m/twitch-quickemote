@@ -4,7 +4,7 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select'])
 
     $timeout(function() {
         $scope.buttons = window.__g133mbuttons || [];
-    }, 2000);
+    }, 500);
 
     $scope.addButton = function() {
         $scope.buttons.push({
