@@ -26,10 +26,30 @@ body {
   padding: 20px;
 }
 
+.paypal div:first-child {
+  margin-bottom: 10px;
+}
+
 .icon-button button {
   padding: 4px;
   min-width: 30px;
 }
 .icon-button img {
   height: 20px;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.inline-block {
+  display: inline-block;
+}
+
+.vertical-top {
+  vertical-align: top;
 }
