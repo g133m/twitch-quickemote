@@ -2,12 +2,27 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select', 'qImproved'])
 
 .controller('mainController', ['$scope', 'emoteTemplates', '$uibModal', '$timeout', '$interval', 'emoteGetter', function($scope, emoteTemplates, $uibModal, $timeout, $interval, emoteGetter) {
     $scope.loading = true;
-
-   emoteGetter.getEmotes().then(function() {
+    $scope.saved = false;
+    $scope.scriptUrl = 'js/quickEmote.user.js'
+    emoteGetter.getEmotes().then(function() {
         $timeout(function() {
-            $scope.buttons = window.__g133mbuttons || [];
+            try {
+                $scope.buttons = JSON.parse(localStorage.g133mbuttons_data) || [];
+                $scope.saved = localStorage.g133mbuttons_savestatus == 'saved';
+                localStorage.g133mbuttons_savestatus = '';
+            } catch(e) {
+                $scope.buttons = [];
+                $uibModal.open({
+                    template: '<div class="modal-body">'+
+                    '<strong>Upgraded 09-30-2016</strong> <button class="btn btn-sm" ng-click="$close()">x</button><br />'+
+                            'If you are upgrading from a previous version you will have to <button class="btn btn-success" ng-click="installScript()">Install</button>'+
+                            'the script again (see instructions) and re-create your buttons.'+
+                            '<br /><br />If this is your first time here, Welcome! Click the Install button and follow instructions on the main page!</div>',
+                    scope: $scope
+                });
+            }
             $scope.loading = false;
-        });
+        }, 500);
     });
 
     $scope.addButton = function() {
@@ -22,20 +37,13 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select', 'qImproved'])
     $scope.urlToFile = null;
 
     $scope.download = function() {
-        window.open($scope.urlToFile);
+        localStorage.g133mbuttons_data = JSON.stringify($scope.buttons);
+        localStorage.g133mbuttons_savestatus = 'saving';
+        location.reload();
     };
 
-    $scope.makeBlob = function(text) {
-        var data = new Blob([text], {type: 'text/javascript'});
-        var reader = new FileReader();
-        reader.onload = function(e) {
-            $timeout(function(){
-                $scope.urlToFile = e.target.result;
-                $scope.generating = false;
-            });
-        };
-
-        reader.readAsDataURL(data);
+    $scope.installScript = function() {
+        window.open($scope.scriptUrl);
     };
 
     $scope.removeButton = function(button) {
@@ -65,23 +73,6 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select', 'qImproved'])
         $scope.addButton();
     };
 
-    $scope.importButtons = function() {
-        if(!$scope.importText)
-            return;
-        try {
-            var matches = $scope.importText.match(/(\{"text.+)/g).map(function(m) {
-                if(m[m.length-1] == ',')
-                    m = m.substr(0, m.length-1);
-                return JSON.parse(m);
-            });
-            $scope.buttons = $scope.buttons.concat(matches);
-            $scope.importing = false;
-        } catch(e) {
-            $scope.error = 'Unable to import';
-        }
-
-    };
-
     $scope.lookupIcon = function(callback) {
         return $uibModal.open({
             templateUrl: '/emoteSearch',
@@ -94,38 +85,6 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select', 'qImproved'])
             }
         }).result;
     };
-
-
-    $interval(function() {
-        if($scope.generating) {
-            $scope.result = '[\n  '+
-                $scope.buttons.map(function(b) {
-                    return JSON.stringify(b);
-                }).join(',\n  ')
-            + '\n]';
-
-            var res = document.getElementById('/scriptfile.js').innerHTML.replace('{script}', $scope.result);
-            $scope.makeBlob(res);
-        }
-    }, 2000);
-    var buttonsUpdated = _.debounce(function(b) {
-        
-        
-        $scope.result = '[\n  '+
-            $scope.buttons.map(function(b) {
-                return JSON.stringify(b);
-            }).join(',\n  ')
-        + '\n]';
-
-        var res = document.getElementById('/scriptfile.js').innerHTML.replace('{script}', $scope.result);
-        $scope.makeBlob(res);
-    }, 2000);
-
-    $scope.$watch('buttons', function(b){ 
-        if(!b || !b.length)
-            return;
-        $scope.generating = true;
-    }, true);
 }])
 
 .controller('emoteSearchController', ['$scope', 'emoteGetter', 'emoteTemplates', '$timeout', 'callback', function($scope, emoteGetter, emoteTemplates, $timeout, callback) {

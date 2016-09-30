@@ -20,36 +20,12 @@
 	</head>
 	<body ng-controller="mainController">
 		<h1>
-			twitch Quick Emote
+			twitch Quick Emote <small> v0.1.2</small>
 		</h1>
-
-		<!--
-		<div class="row form-group">
-			<div class="col-xs-4">
-				<button class="btn btn-success" ng-click="createNew()">
-					Create New Button Set
-				</button>
-			</div>
-			<div class="col-xs-4">
-				<button class="btn btn-warning" ng-click="importing=true">
-					Import Button Set
-				</button>
-			</div>
-		</div>
-
-		<div class="row" ng-show="importing">
-			<div class="col-xs-4">
-				<textarea ng-model="importText" class="form-control">
-				</textarea>
-			</div>
-			<div class="col-xs-4">
-				<button class="btn btn-info" ng-click="importButtons()">
-					Import
-				</button>
-			</div>
-		</div>
-		!-->
 		<h4 ng-show="loading">Loading...</h4>
+		<div uib-alert class="alert-success" ng-show="saved" close="saved = false" dismiss-on-timeout="3000">
+			Saved Buttons!
+		</div>
 		<div class="row" ng-show="!loading">
 			<div class="col-xs-12 col-md-6">
 				<h4 class="bold">
@@ -96,8 +72,8 @@
 				<div class="row form-group"></div>
 				<div class="row">
 					<div class="col-xs-6">
-						<button class="btn btn-primary" ng-click="download()" ng-disabled="generating">
-							Generate Script
+						<button class="btn btn-primary" ng-click="download()" ng-disabled="buttons.length == 0">
+							Save Buttons
 						</button>
 					</div>
 				</div>
@@ -111,24 +87,28 @@
 				</div>
 
 				<h4>Instructions</h4>
-				<strong>If you have the script already loaded your buttons should appear automatically</strong>
+				<strong>If you have the script already loaded have made buttons before, your buttons should appear automatically</strong>
 				<div class="instructions">
+					<h5>Installing the Script</h5>
+					<ul>
+						<li>Install Tampermonkey / Greasemonkey for Chrome / Firefox respectively</li>
+						<li>
+							<a class="btn btn-success" ng-click="installScript()">Install Script</a> and refresh this page
+						</li>
+						<li>Add Buttons and Save</li>
+						<li>Navigate to the twitch channel of your choice to see buttons appear below chat</li>
+					</ul>
+
 					<h5>Creating Buttons</h5>
 					<ul>
 						<li>Create a button with <strong>+ Add Button</strong></li>
 						<li>Set the Icon for the button as it will appear below your chat box (choose emotes from the window that pops up)</li>
 						<li>Enter the emotes text or search with <strong>Find Emote</strong> and click emotes to add them to the text box</li>
 						<li>To set channel-specific icons, enter the channel name and click Get Emotes in the emotes search pop-up</li>
+						<li>When completed, click Save</li>
 					</ul>
 
-					<h5>Installing the Script</h5>
-					<ul>
-						<li>Once all your buttons are created as desired, click Generate Script</li>
-						<li>Copy the script content that appears in the new window</li>
-						<li>Open Tampermonkey / Greasemonkey and either edit the old script if you've already installed it, or add a new script</li>
-						<li>Paste / overwrite the script and save (CTRL+S)</li>
-						<li>Navigate to the twitch channel of your choice to see buttons appear below chat</li>
-					</ul>
+					
 				</div>
 				<div class="paypal">
 					<div>
@@ -152,10 +132,6 @@
 
 			
 		</div>
-		<div class="col-xs-12 col-md-6">
-			
-
-		</div>
 
 
 		<script type="text/ng-template" id="/emoteSearch">
@@ -163,9 +139,9 @@
 				<h3>Search for emotes <button class="btn btn-sm" ng-click="$close()">x</button></h3>
 			</div>
 			<div class="modal-body container-fluid">
-				<uib-alert type="error" ng-show="error">
-					{{error}} <button class="btn btn-sm btn-danger" ng-click="error = null">x</button>
-				</uib-alert>
+				<div uib-alert class="alert-danger" ng-show="error" close="error = null">
+					{{error}}
+				</div>
 				<div class="row">
 					<div class="col-xs-4">
 						<input class="form-control" type="text" ng-model="channelText" placeholder="Channel (optional)" ng-keyup="$event.keyCode == 13 && search()" />
@@ -203,29 +179,5 @@
 			</div>
 			<div class="modal-footer"></div>
 		</script>
-
-<script type="text/ng-template" id="/scriptfile.js">
-// ==UserScript==
-// @name         Twitch Quick Emote Buttons
-// @namespace    https://g133m.github.io/twitch-quickemote
-// @version      0.1.1
-// @require      https://ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js
-// @require      https://g133m.github.io/twitch-quickemote/wizard/js/main.js
-// @description  Add buttons to quickly send emote-heavy messages to chat
-// @author       g133m
-// @include      https://www.twitch.tv/*
-// @include      https://g133m.github.io/twitch-quickemote/wizard/
-// @grant        unsafeWindow
-// @run-at       document-end
-// ==/UserScript==
-(function() {
-	'use strict';
-var buttons = {script};
-unsafeWindow.__g133mbuttons = buttons;
-initializeEmoteButtons(
-	buttons
-);
-})();
-</script>
 	</body>
 </html>
