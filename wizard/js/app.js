@@ -1,10 +1,14 @@
-angular.module('wizardApp', ['ui.bootstrap', 'ui.select'])
+angular.module('wizardApp', ['ui.bootstrap', 'ui.select', 'qImproved'])
 
-.controller('mainController', ['$scope', 'emoteTemplates', '$uibModal', '$timeout', '$interval', function($scope, emoteTemplates, $uibModal, $timeout, $interval) {
+.controller('mainController', ['$scope', 'emoteTemplates', '$uibModal', '$timeout', '$interval', 'emoteGetter', function($scope, emoteTemplates, $uibModal, $timeout, $interval, emoteGetter) {
+    $scope.loading = true;
 
-    $timeout(function() {
-        $scope.buttons = window.__g133mbuttons || [];
-    }, 500);
+   emoteGetter.getEmotes().then(function() {
+        $timeout(function() {
+            $scope.buttons = window.__g133mbuttons || [];
+            $scope.loading = false;
+        });
+    });
 
     $scope.addButton = function() {
         $scope.buttons.push({
@@ -191,44 +195,73 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select'])
     var getter = {
         twitchEmotes: [],
         bttvEmotes: [],
+        getSubscribers: function() {
+            var d = $q.defer();
+            if(getter.subscribers)
+                d.resolve(getter.subscribers);
+            else
+                $http.get('https://twitchemotes.com/api_cache/v2/subscriber.json').then(function(r) {
+                    if(r && r.data)
+                        getter.subscribers = r.data;
+                    d.resolve(getter.subscribers);
+                }, function() {
+                    d.reject();
+                })
+            return d.promise;
+        },
+        subscribers: null,
         getEmotes: function(channel) {
             channel = (channel || '').toLowerCase();
             var d = $q.defer();
             var promise = null;
             if(channel) {
-                $q.all([
-                    $http.get('https://twitchemotes.com/api_cache/v2/subscriber.json'),
+                $q.allSettled([
+                    getter.getSubscribers(),
                     $http.get('https://api.betterttv.net/2/channels/'+channel)
                 ]).then(function(resp) {
-                    var t = resp[0], b = resp[1];
-                    if(t.status != 200 || b.status != 200)
-                        return d.reject("Could not retrieve emotes. Check the twitch channel for typos");
+                    var t = resp[0].value, b = resp[1].value;
+                    if(!t)
+                        t = [];
+                    else
+                        t = (t.channels[channel] || {}).emotes || [];
+
+                    if(!b || b.status != 200)
+                        b = [];
+                    else
+                        b = b.data.emotes;
 
                     d.resolve({
-                        twitch: t.data.channels[channel].emotes,
-                        bttv: b.data.emotes
+                        twitch: t,
+                        bttv: b
                     });
                 });
             } else if(getter.twitchEmotes.length && getter.bttvEmotes.length) {
                     d.resolve({twitch: getter.twitchEmotes, bttv: getter.bttvEmotes});
             } else {
-                $q.all([
+                $q.allSettled([
                     $http.get('https://twitchemotes.com/api_cache/v2/global.json'),
                     $http.get('https://api.betterttv.net/2/emotes')
                 ]).then(function(resp) {
-                    var t = resp[0], b = resp[1];
-                    if(t.status != 200 || b.status != 200)
-                        return d.reject("Could not retrieve emotes");
+                    var t = resp[0].value, b = resp[1].value;
+                    if(!t || t.status != 200)
+                        t = {};
+                    else 
+                        t = t.data.emotes;
+
+                    if(!b || b.status != 200)
+                        b = [];
+                    else 
+                        b = b.data.emotes;
                     var twitchEmotes = [];
-                    for(var code in t.data.emotes) {
-                        t.data.emotes[code].code = code;
-                        t.data.emotes[code].source = 'twitch';
-                        twitchEmotes.push(t.data.emotes[code]);
+                    for(var code in t) {
+                        t[code].code = code;
+                        t[code].source = 'twitch';
+                        twitchEmotes.push(t[code]);
                     }
 
                     d.resolve({
                         twitch: twitchEmotes,
-                        bttv: b.data.emotes
+                        bttv:b
                     });
                 });
             }
@@ -239,3 +272,48 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select'])
 
     return getter;
 }]);
+
+angular.module("qImproved", [])
+.config(function ($provide) {
+  $provide.decorator("$q", function ($delegate) {
+
+    /**
+     * $q.allSettled returns a promise that is fulfilled with an array of promise state snapshots, 
+     * but only after all the original promises have settled, i.e. become either fulfilled or rejected.
+     * 
+     * This method is often used in order to execute a number of operations concurrently and be 
+     * notified when they all finish, regardless of success or failure.
+     *
+     * @param promises array or object of promises
+     * @returns {Promise} when resolved will contain an an array or object of resolved or rejected promises.
+     * A resolved promise have the form { status: "fulfilled", value: value }.  A rejected promise will have
+     * the form { status: "rejected", reason: reason }.
+     */
+    function allSettled(promises) {
+      var deferred = $delegate.defer(),
+          counter = 0,
+          results = angular.isArray(promises) ? [] : {};
+
+      angular.forEach(promises, function(promise, key) {
+        counter++;
+        $delegate.when(promise).then(function(value) {
+          if (results.hasOwnProperty(key)) return;
+          results[key] = { status: "fulfilled", value: value };
+          if (!(--counter)) deferred.resolve(results);
+        }, function(reason) {
+          if (results.hasOwnProperty(key)) return;
+          results[key] = { status: "rejected", reason: reason };
+          if (!(--counter)) deferred.resolve(results);
+        });
+      });
+
+      if (counter === 0) {
+        deferred.resolve(results);
+      }
+
+      return deferred.promise;
+    }
+    $delegate.allSettled = allSettled;
+    return $delegate;
+  });
+});

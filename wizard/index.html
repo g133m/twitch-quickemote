@@ -49,8 +49,8 @@
 			</div>
 		</div>
 		!-->
-
-		<div class="row">
+		<h4 ng-show="loading">Loading...</h4>
+		<div class="row" ng-show="!loading">
 			<div class="col-xs-12 col-md-6">
 				<h4 class="bold">
 					Configure Emote Buttons
@@ -136,7 +136,7 @@
 
 		<script type="text/ng-template" id="/emoteSearch">
 			<div class="modal-header">
-				<h3>Search for emotes <button class="btn btn-danger btn-sm" ng-click="$close()">x</button></h3>
+				<h3>Search for emotes <button class="btn btn-sm" ng-click="$close()">x</button></h3>
 			</div>
 			<div class="modal-body container-fluid">
 				<uib-alert type="error" ng-show="error">
@@ -144,7 +144,7 @@
 				</uib-alert>
 				<div class="row">
 					<div class="col-xs-4">
-						<input class="form-control" type="text" ng-model="channelText" placeholder="Channel (optional)" />
+						<input class="form-control" type="text" ng-model="channelText" placeholder="Channel (optional)" ng-keyup="$event.keyCode == 13 && search()" />
 					</div>
 					<div class="col-xs-8">
 						<button class="btn btn-primary" ng-disabled="fetchingEmotes" ng-click="search()">
@@ -156,10 +156,12 @@
 					<div class="col-xs-12">
 						<h4>Twitch Emotes</h4>
 					</div>
+					<
 					<div class="col-xs-12">
 						<button class="btn" ng-repeat="emote in twitchOptions |orderBy:'image_id'" ng-click="setEmote(emote)" uib-tooltip="{{emote.code}}">
 							<img ng-src="{{getImgSrc(emote, 'twitch')}}" />
 						</button>
+						<div ng-show="!fetchingEmotes && twitchOptions.length ==0">No results found</div>
 					</div>
 				</div>
 				<div class="row">
@@ -170,6 +172,7 @@
 						<button class="btn" ng-repeat="emote in bttvOptions | orderBy:'id'" ng-click="setEmote(emote)" uib-tooltip="{{emote.code}}">
 							<img ng-src="{{getImgSrc(emote, 'bttv')}}" />
 						</button>
+						<div ng-show="!fetchingEmotes && bttvOptions.length ==0">No results found</div>
 					</div>
 				</div>
 
