@@ -58,6 +58,7 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select'])
         $scope.addNew = true;
         $scope.importing = false;
         $scope.buttons = [];
+        $scope.addButton();
     };
 
     $scope.importButtons = function() {
