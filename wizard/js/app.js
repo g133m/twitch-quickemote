@@ -2,8 +2,10 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select'])
 
 .controller('mainController', ['$scope', 'emoteTemplates', '$uibModal', '$timeout', function($scope, emoteTemplates, $uibModal, $timeout) {
 
-    $scope.buttons = window.__g133mbuttons || [];
-    
+    $timeout(function() {
+        $scope.buttons = window.__g133mbuttons || [];
+    }, 2000);
+
     $scope.addButton = function() {
         $scope.buttons.push({
             text: '',
@@ -28,6 +30,7 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select'])
                 $scope.generating = false;
             });
         };
+
         reader.readAsDataURL(data);
     };
 
@@ -87,7 +90,9 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select'])
         }).result;
     };
 
-    $scope.$watch('buttons', _.debounce(function() {
+    $scope.$watch('buttons', _.debounce(function(b) {
+        if(!b || !b.length)
+            return;
         $scope.generating = true;
         $scope.result = '[\n  '+
             $scope.buttons.map(function(b) {

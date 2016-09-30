@@ -90,7 +90,7 @@
 			<div class="row form-group"></div>
 			<div class="row">
 				<div class="col-xs-6">
-					<button class="btn btn-primary" ng-click="download()" ng-disabled="generating || !urlToFile">
+					<button class="btn btn-primary" ng-click="download()" ng-disabled="generating">
 						Install
 					</button>
 				</div>
@@ -152,9 +152,10 @@
 // @require      https://g133m.github.io/twitch-quickemote/wizard/js/main.js
 // @description  Add buttons to quickly send emote-heavy messages to chat
 // @author       g133m
-// @include        https://www.twitch.tv/*
-// @include        https://g133m.github.io/twitch-quickemote/wizard/
-// @grant unsafeWindow
+// @include      https://www.twitch.tv/*
+// @include      https://g133m.github.io/twitch-quickemote/wizard/
+// @grant        unsafeWindow
+// @run-at       document-end
 // ==/UserScript==
 (function() {
 	'use strict';
