@@ -80,4 +80,6 @@ var initializeEmoteButtons = function(buttons) {
             });
         });
     });
+
+    window._g133mbuttons = buttons;
 };

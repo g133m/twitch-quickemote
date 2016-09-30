@@ -17,56 +17,83 @@
 			twitch Quick Emote
 		</h1>
 
-		<h4 class="bold">
-			Configure Emote Buttons
-		</h4>
-		<button class="btn btn-primary" ng-click="addButton()">
-			+ Add Button
-		</button>
-		<div class="buttons">
-			<div class="row">
-				<div class="col-xs-2">
-					<h4 class="bold">Icon</h4>
-				</div>
-				<div class="col-xs-6">
-					<h4 class="bold">Emotes Sent When Pressed</h4>
-				</div>
-				<div class="col-xs-2">
-					
-				</div>
-				<div class="col-xs-2">
-					
-				</div>
+		<div class="row form-group">
+			<div class="col-xs-4">
+				<button class="btn btn-success" ng-click="createNew()">
+					Create New Button Set
+				</button>
 			</div>
-			<div ng-repeat="button in buttons track by $index" class="stripes">
-				<div class="row">
-					<div class="col-xs-2">
-						<button class="btn" ng-click="changeIcon(button)" uib-tooltip="Click to change icon" tooltip-placement="top-left">
-							<img ng-src="{{button.icon}}"  />
-						</button>
-					</div>
-					<div class="col-xs-6">
-						<textarea class="form-control" ng-model="button.text" placeholder="Enter emotes here">
-						</textarea>
-					</div>
-					<div class="col-xs-2">
-						<button class="btn btn-sm btn-primary" ng-click="getIconText(button)">
-							Find Emote
-						</button>
-					</div>
-					<div class="col-xs-2">
-						<button class="btn btn-sm btn-danger" ng-click="removeButton(button)">delete</button>
-					</div>
-				</div>
+			<div class="col-xs-4">
+				<button class="btn btn-warning" ng-click="importing=true">
+					Import Button Set
+				</button>
 			</div>
 		</div>
 
-		<div class="row form-group"></div>
-		<div class="row">
-			<div class="col-xs-6">
-				<button class="btn btn-primary" ng-click="generate()">
-					Generate and Download
+		<div class="row" ng-show="importing">
+			<div class="col-xs-4">
+				<textarea ng-model="importText" class="form-control">
+				</textarea>
+			</div>
+			<div class="col-xs-4">
+				<button class="btn btn-info" ng-click="importButtons()">
+					Import
 				</button>
+			</div>
+		</div>
+
+		<div ng-show="addNew || (importing && buttons.length)">
+			<h4 class="bold">
+				Configure Emote Buttons
+			</h4>
+			<button class="btn btn-primary" ng-click="addButton()">
+				+ Add Button
+			</button>
+			<div class="buttons">
+				<div class="row">
+					<div class="col-xs-2">
+						<h4 class="bold">Icon</h4>
+					</div>
+					<div class="col-xs-6">
+						<h4 class="bold">Emotes Sent When Pressed</h4>
+					</div>
+					<div class="col-xs-2">
+						
+					</div>
+					<div class="col-xs-2">
+						
+					</div>
+				</div>
+				<div ng-repeat="button in buttons track by $index" class="stripes">
+					<div class="row">
+						<div class="col-xs-2">
+							<button class="btn" ng-click="changeIcon(button)" uib-tooltip="Click to change icon" tooltip-placement="top-left">
+								<img ng-src="{{button.icon}}"  />
+							</button>
+						</div>
+						<div class="col-xs-6">
+							<textarea class="form-control" ng-model="button.text" placeholder="Enter emotes here">
+							</textarea>
+						</div>
+						<div class="col-xs-2">
+							<button class="btn btn-sm btn-primary" ng-click="getIconText(button)">
+								Find Emote
+							</button>
+						</div>
+						<div class="col-xs-2">
+							<button class="btn btn-sm btn-danger" ng-click="removeButton(button)">delete</button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="row form-group"></div>
+			<div class="row">
+				<div class="col-xs-6">
+					<button class="btn btn-primary" ng-click="download()" ng-disabled="generating || !urlToFile">
+						Install
+					</button>
+				</div>
 			</div>
 		</div>
 
@@ -75,7 +102,7 @@
 
 		<script type="text/ng-template" id="/emoteSearch">
 			<div class="modal-header">
-				<h3>Search for emotes</h3>
+				<h3>Search for emotes <button class="btn btn-danger btn-sm" ng-click="$close()">x</button></h3>
 			</div>
 			<div class="modal-body container-fluid">
 				<uib-alert type="error" ng-show="error">
@@ -111,6 +138,7 @@
 						</button>
 					</div>
 				</div>
+
 			</div>
 			<div class="modal-footer"></div>
 		</script>
@@ -124,7 +152,8 @@
 // @require      https://g133m.github.io/twitch-quickemote/wizard/js/main.js
 // @description  Add buttons to quickly send emote-heavy messages to chat
 // @author       g133m
-// @match        https://www.twitch.tv/*
+// @include        https://www.twitch.tv/*
+// @include        https://g133m.github.io/twitch-quickemotes/wizard/
 // ==/UserScript==
 (function() {
 	'use strict';

@@ -21,3 +21,7 @@ pre {
   height: 400px;
   width: 600px;
 }
+
+body {
+  padding: 20px;
+}

@@ -1,6 +1,6 @@
 angular.module('wizardApp', ['ui.bootstrap', 'ui.select'])
 
-.controller('mainController', ['$scope', 'emoteTemplates', '$uibModal', function($scope, emoteTemplates, $uibModal) {
+.controller('mainController', ['$scope', 'emoteTemplates', '$uibModal', '$timeout', function($scope, emoteTemplates, $uibModal, $timeout) {
 
     $scope.buttons = [];
 
@@ -13,28 +13,23 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select'])
             size: 1
         });
     };
-    var textFile = null
-    , makeBlob = function(text) {
-        var data = new Blob([text], {type: 'octet/stream'});
+    $scope.urlToFile = null;
 
-        // If we are replacing a previously generated file we need to
-        // manually revoke the object URL to avoid memory leaks.
-        if (textFile !== null) {
-          window.URL.revokeObjectURL(textFile);
-        }
+    $scope.download = function() {
+        window.open($scope.urlToFile);
+    };
 
-        textFile = window.URL.createObjectURL(data);
-
-        var a = document.createElement("a");
-        document.body.appendChild(a);
-        a.style = "display: none";
-        a.href = textFile;
-        a.download = 'twitchQuickEmote_buttons.js';
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
-        return textFile;
-    }
+    $scope.makeBlob = function(text) {
+        var data = new Blob([text], {type: 'text/javascript'});
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            $timeout(function(){
+                $scope.urlToFile = e.target.result;
+                $scope.generating = false;
+            });
+        };
+        reader.readAsDataURL(data);
+    };
 
     $scope.removeButton = function(button) {
         $scope.buttons.splice($scope.buttons.indexOf(button), 1);
@@ -51,22 +46,49 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select'])
     };
 
     $scope.getIconText = function(button) {
-        $scope.lookupIcon().then(function(emote) {
+        $scope.lookupIcon(function(emote) {
             button.text += emote.code + ' ';
         });
     };
 
-    $scope.lookupIcon = function() {
+    $scope.createNew = function() {
+        $scope.addNew = true;
+        $scope.importing = false;
+        $scope.buttons = [];
+    };
+
+    $scope.importButtons = function() {
+        if(!$scope.importText)
+            return;
+        try {
+            var matches = $scope.importText.match(/(\{"text.+)/g).map(function(m) {
+                if(m[m.length-1] == ',')
+                    m = m.substr(0, m.length-1);
+                return JSON.parse(m);
+            });
+            $scope.buttons = $scope.buttons.concat(matches);
+            $scope.importing = false;
+        } catch(e) {
+            $scope.error = 'Unable to import';
+        }
+
+    };
+
+    $scope.lookupIcon = function(callback) {
         return $uibModal.open({
             templateUrl: '/emoteSearch',
             controller: 'emoteSearchController',
-            scope: $scope
+            scope: $scope,
+            resolve: {
+                callback: function() {
+                    return callback;
+                }
+            }
         }).result;
     };
 
-    var template = 
-
-    $scope.generate = function() {
+    $scope.$watch('buttons', _.debounce(function() {
+        $scope.generating = true;
         $scope.result = '[\n  '+
             $scope.buttons.map(function(b) {
                 return JSON.stringify(b);
@@ -74,13 +96,11 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select'])
         + '\n]';
 
         var res = document.getElementById('/scriptfile.js').innerHTML.replace('{script}', $scope.result);
-        console.log(res);
-
-        $scope.fileurl = makeBlob(res);
-    };
+        $scope.makeBlob(res);
+    }, 2000), true);
 }])
 
-.controller('emoteSearchController', ['$scope', 'emoteGetter', 'emoteTemplates', '$timeout', function($scope, emoteGetter, emoteTemplates, $timeout) {
+.controller('emoteSearchController', ['$scope', 'emoteGetter', 'emoteTemplates', '$timeout', 'callback', function($scope, emoteGetter, emoteTemplates, $timeout, callback) {
     $scope.channelText = '';
 
     $scope.twitchOptions = [];
@@ -115,6 +135,8 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select'])
     };
 
     $scope.setEmote = function(emote) {
+        if(callback)
+            return callback(emote);
         $scope.$close(emote);
     };
 }])
