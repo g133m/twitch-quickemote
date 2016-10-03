@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Twitch Quick Emote Buttons
-// @version      0.1.2
+// @version      0.1.3
 // @match        https://www.twitch.tv/*
 // @match        https://g133m.github.io/twitch-quickemote/wizard/
 // @copyright    2016+, g133m
@@ -12,7 +12,7 @@
 // @grant        unsafeWindow
 // @grant        GM_getValue
 // @grant        GM_setValue
-// @run-at       document-end
+// @run-at       document-idle
 // ==/UserScript==
 (function() {
 	'use strict';
@@ -25,7 +25,7 @@
 		GM_setValue("g133mbuttons", '[]');
 		localStorage.g133mbuttons_data = '[]';
 	}
-    unsafeWindow.__g133mbuttonsVERSION = '0.1.2';
+    unsafeWindow.__g133mbuttonsVERSION = '0.1.3';
  unsafeWindow.__g133mbuttonsSAVED = false;
 if(localStorage.g133mbuttons_savestatus == 'saving') {
         buttons = JSON.parse(localStorage.g133mbuttons_data);
