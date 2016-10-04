@@ -6,7 +6,7 @@ this.$ = this.jQuery = jQuery.noConflict(true);
 
 var initializeEmoteButtons = function(buttons) {
     $(document).ready(function() {
-        var menu = $('<div class="emoticon-selector hidden"><div class="emoticon-selector-box dropmenu"><div class="emotes channel-emotes"><h5 style="text-align:center"><a href="https://g133m.github.io/twitch-quickemote/wizard" target="_blank">Quick Emote</a></h5><div class="emoticon-grid"></div></div></div>').appendTo('.chat-interface');
+        var menu = $('<div class="emoticon-selector hidden"><div class="emoticon-selector-box dropmenu"><div class="emotes channel-emotes"><h5 style="text-align:center"><a href="https://g133m.github.io/twitch-quickemote/wizard" target="_blank">QuickEMOTE</a></h5><div class="emoticon-grid"></div></div></div>').appendTo('.chat-interface');
         menu[0].style.border = '1px solid #aaaaaa';
         var emoteContainer = $('.emoticon-grid', menu);
         var btnFormat = '<span class="emoticon tooltip " style="background-image: url(&quot;{url}&quot;);" original-title="{title}"></span>';
