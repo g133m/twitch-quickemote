@@ -1,6 +1,6 @@
-angular.module('wizardApp', ['ui.bootstrap', 'ui.select', 'qImproved'])
+angular.module('wizardApp', ['ui.bootstrap', 'ui.select', 'qImproved', 'ngSanitize'])
 
-.controller('mainController', ['$scope', 'emoteTemplates', '$uibModal', '$timeout', '$interval', 'emoteGetter', function($scope, emoteTemplates, $uibModal, $timeout, $interval, emoteGetter) {
+.controller('mainController', ['$scope', 'emoteTemplates', '$uibModal', '$timeout', '$interval', 'emoteGetter', 'emoji', function($scope, emoteTemplates, $uibModal, $timeout, $interval, emoteGetter, emoji) {
     $scope.loading = true;
     $scope.saved = false;
     $scope.scriptUrl = 'js/quickEmote.user.js'
@@ -62,7 +62,10 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select', 'qImproved'])
 
     $scope.getIconText = function(button) {
         $scope.lookupIcon(function(emote) {
-            button.text += emote.code + ' ';
+            if(typeof(emote) == 'string')
+                button.text += emote;
+            else
+                button.text += emote.code + ' ';
         });
     };
 
@@ -85,10 +88,17 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select', 'qImproved'])
             }
         }).result;
     };
+
+    $scope.channelText = '';
 }])
 
-.controller('emoteSearchController', ['$scope', 'emoteGetter', 'emoteTemplates', '$timeout', 'callback', function($scope, emoteGetter, emoteTemplates, $timeout, callback) {
-    $scope.channelText = '';
+.filter('to_trusted', ['$sce', function($sce){
+    return function(text) {
+        return $sce.trustAsHtml(text);
+    };
+}])
+
+.controller('emoteSearchController', ['$scope', 'emoteGetter', 'emoteTemplates', '$timeout', 'callback', 'emoji', function($scope, emoteGetter, emoteTemplates, $timeout, callback, emoji) {
 
     $scope.twitchOptions = [];
     $scope.bttvOptions = [];
@@ -111,6 +121,8 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select', 'qImproved'])
        
     });
 
+    $scope.showEmoji = !!callback;
+
     $scope.search();
 
     $scope.getImgSrc = function(emote, source) {
@@ -126,6 +138,38 @@ angular.module('wizardApp', ['ui.bootstrap', 'ui.select', 'qImproved'])
             return callback(emote);
         $scope.$close(emote);
     };
+
+    function fixedFromCharCode (codePt) {
+        if (codePt > 0xFFFF) {
+            codePt -= 0x10000;
+            return String.fromCharCode(0xD800 + (codePt >> 10), 0xDC00 + (codePt & 0x3FF));
+        } else {
+            return String.fromCharCode(codePt);
+        }
+    }
+
+    $scope.setEmoji = function(emoji) {
+        if(!emoji)
+            return;
+        var ret = fixedFromCharCode(parseInt(emoji.ref.split(' ').join(''), 16));
+
+        if(callback)
+            return callback(ret);
+    };
+
+    $scope.foundEmoji = [];
+
+    $scope.findEmoji = function(q) {
+        $scope.foundEmoji = emoji.search(q);
+    };
+
+    $scope.getEmojiIcon = function(code) {
+        if(!code)
+            return '';
+        return code.split(' ').map(function(c) {
+            return '&#x'+c+';';
+        }).join('');
+    }
 }])
 .factory('emoteTemplates', function() {
     var emoteTemplates = {
