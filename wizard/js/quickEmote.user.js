@@ -1,6 +1,6 @@
 // ==UserScript==
 // @name         Twitch Quick Emote Buttons
-// @version      0.1.5
+// @version      0.1.6
 // @match        https://www.twitch.tv/*
 // @match        https://g133m.github.io/twitch-quickemote/wizard/
 // @copyright    2018+, g133m
